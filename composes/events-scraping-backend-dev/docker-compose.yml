@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+  backend:
+    restart: always
+    image: events-scraping-backend:dev
+    container_name: events-scraping-backend-dev
+    command: ["sh","-c", "python3 run.py runserver"]
+    ports:
+      - 8000:8000
+
+networks:
+  default:
+    external:
+      name: events-scraping-dev
