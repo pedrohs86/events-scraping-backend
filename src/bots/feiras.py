@@ -1,7 +1,7 @@
-import unicodedata
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 import re
+from src.common.utils import normalize_string
 
 from src.models.events import Event
 
@@ -46,24 +46,17 @@ def search_feiras(filtro):
                 categoria_aux = categoria_type.findall(td.text)[0]
                 categoria_match.append(categoria_aux)
 
-        # print(date_match)
-        # print(local_match)
-        # print(categoria_match)
-        # print(len(categoria_match), len(date_match), len(all_events_name), len(local_match))
-
         for i in range(len(all_events_name)):
-            events_list.append(Event(date_match[i], local_match[i], all_events_name[i], categoria_match[i]))
+            events_list.append(Event(date_match[i], local_match[i], all_events_name[i], categoria_match[i], url))
         # print(events_list)
         events_list_filter = []
-        if filtro:
-            filtro_normalize = unicodedata.normalize("NFD", filtro.lower())
-            filtro_normalize = filtro_normalize.encode("ascii", "ignore")
-            filtro_normalize = filtro_normalize.decode("utf-8")
+        if filtro.get('name', "") != "" or filtro.get('categoria', "") != "":
+            filtro['categoria'] = normalize_string(filtro.get('categoria', ""))
+            filtro['name'] = normalize_string(filtro.get('name', ""))
             for i in range(len(all_events_name)):
-                evento_normalize = unicodedata.normalize("NFD", events_list[i].categoria.lower())
-                evento_normalize = evento_normalize.encode("ascii", "ignore")
-                evento_normalize = evento_normalize.decode("utf-8")
-                if filtro_normalize in evento_normalize:
+                categoria_evento_normalize = normalize_string(events_list[i].categoria.lower())
+                name_evento_normalize = normalize_string(events_list[i].name.lower())
+                if (filtro['categoria'] != "" and filtro['categoria'] in categoria_evento_normalize) or (filtro['name'] != "" and filtro['name'] in name_evento_normalize):
                     # print(events_list_filter)
                     events_list_filter.append(events_list[i].toJSON())
             return events_list_filter
@@ -74,6 +67,5 @@ def search_feiras(filtro):
         # print('Foi encontrado no site http://www.feirasdobrasil.com.br/feirasdasemana.asp o(s) seguinte(s) evento(s): ')
         # print(events_list_filter)
     except Exception as e:
-        print('feiras: ', e)
         return 'except' + e.__str__()
         # print('Pagina com erro')

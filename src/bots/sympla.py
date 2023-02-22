@@ -2,6 +2,7 @@ import unicodedata
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 import re
+from src.common.utils import normalize_string
 
 from src.models.events import Event
 
@@ -72,30 +73,24 @@ def search_sympla(url, filtro, paginas, events_list_filter):
                         events_date_list.append('On demand')
 
         for i in range(len(events_date_list) - 1):
-            events_list.add(Event(events_date_list[i], events_local_list[i], events_name_list[i], categoria.title()))
+            events_list.add(Event(events_date_list[i], events_local_list[i], events_name_list[i], categoria.title(), url))
         # print(events_list)
 
-        if filtro:
-            filtro_normalize = unicodedata.normalize("NFD", filtro.lower())
-            filtro_normalize = filtro_normalize.encode("ascii", "ignore")
-            filtro_normalize = filtro_normalize.decode("utf-8")
+        if filtro.get('name', "") != "" or filtro.get('categoria', "") != "":
+            filtro['categoria'] = normalize_string(filtro.get('categoria', ""))
+            filtro['name'] = normalize_string(filtro.get('name', ""))
             for event in events_list:
-                evento_normalize = unicodedata.normalize("NFD", event.name.lower())
-                evento_normalize = evento_normalize.encode("ascii", "ignore")
-                evento_normalize = evento_normalize.decode("utf-8")
+                categoria_evento_normalize = normalize_string(event.categoria.lower())
+                name_evento_normalize = normalize_string(event.name.lower())
 
-                evento_normalize_categoria = unicodedata.normalize("NFD", event.categoria.lower())
-                evento_normalize_categoria = evento_normalize_categoria.encode("ascii", "ignore")
-                evento_normalize_categoria = evento_normalize_categoria.decode("utf-8")
-
-                if filtro_normalize in evento_normalize or filtro_normalize in evento_normalize_categoria:
+                if (filtro['categoria'] != "" and filtro['categoria'] in categoria_evento_normalize) or (filtro['name'] != "" and filtro['name'] in name_evento_normalize):
                     if event.name != 'Sem Titulo':
                         events_list_filter.add(event)
         else:
             events_list_filter = events_list
 
         # events_type = ('eventos\/(tecnologia|gratis)')
-        events_type = ('eventos\/(online|tecnologia|gratis|curso-workshop)')
+        events_type = ('eventos\/(online|tecnologia|gratis|curso-workshop|teatro-espetaculo|infantil|religioso-espiritual|pride)')
         # events_type = ('(eventos\/(online|gratis|curso-workshop|congresso-palestra|tecnologia|teatro-espetaculo))')
         if categoria == 'Indeterminado':
             for link in bs_obj.findAll("a", href=re.compile(events_type)):

@@ -2,11 +2,12 @@ import json
 
 
 class Event:
-    def __init__(self, date, local, name, categoria):
+    def __init__(self, date, local, name, categoria, url= ""):
         self.date = date
         self.local = local
         self.name = name
         self.categoria = categoria
+        self.url = url
 
     def setName(self, name):
         self.name = name
