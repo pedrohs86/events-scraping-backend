@@ -30,4 +30,5 @@ class Event:
             "local": self.local,
             "name": self.name,
             "categoria": self.categoria,
+            "url": self.url,
         }

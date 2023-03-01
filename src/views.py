@@ -14,10 +14,8 @@ def postSearch():
     events_list_filter = set()
 
     try:
-        # result_feiras = search_feiras(data)
-        result_feiras = []
+        result_feiras = search_feiras(data)
         result_sympla = search_sympla('https://www.sympla.com.br/categorias', data, pages, events_list_filter)
-        # print(result_sympla)
         
         if 'except' in result_feiras:
             raise Exception('Error no site feiras')
